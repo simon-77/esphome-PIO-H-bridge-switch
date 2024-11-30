@@ -7,10 +7,18 @@ namespace empty_switch {
 static const char *TAG = "empty_switch.switch";
 
 void EmptySwitch::setup() {
+    ESP_LOGCONFIG(TAG, "Setting up custom pio_hbridge-switch...");
+    if (!pin_) {
+        ESP_LOGW(TAG, "No pin defined for custom pio_hbridge-switch '%s'", this->get_name().c_str());
+        return;
+    }
 
+    gpio_init(pin_);
+    gpio_set_dir(pin_, GPIO_OUT);
 }
 
 void EmptySwitch::write_state(bool state) {
+
 
 }
 
