@@ -3,6 +3,7 @@
 #ifdef USE_RP2040
 
 #include "pico/stdlib.h"
+#include "hardware/pio.h"
 #include "esphome/core/component.h"
 #include "esphome/components/switch/switch.h"
 
