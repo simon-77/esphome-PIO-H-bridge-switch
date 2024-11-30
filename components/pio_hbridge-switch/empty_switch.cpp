@@ -34,7 +34,7 @@ void EmptySwitch::setup() {
     pio_program_t my_pio_program = {
         .instructions = pio_instructions,  // Point to the array of instructions
         .length = sizeof(pio_instructions) / sizeof(uint16_t),  // The number of instructions
-        .origin = -1  // Use free memory
+        .origin = 0
     };
 
     // Claim a PIO instance and state machine
