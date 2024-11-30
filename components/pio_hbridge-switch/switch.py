@@ -1,7 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import switch
-from esphome.const import CONF_ID
+from esphome.const import CONF_ID, CONF_PIN
 
 empty_switch_ns = cg.esphome_ns.namespace('empty_switch')
 EmptySwitch = empty_switch_ns.class_('EmptySwitch', switch.Switch, cg.Component)
