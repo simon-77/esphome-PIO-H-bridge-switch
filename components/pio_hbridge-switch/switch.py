@@ -18,6 +18,6 @@ CONFIG_SCHEMA = switch.SWITCH_SCHEMA.extend({
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     pin = await cg.gpio_pin_expression(config[CONF_PIN])  # Await the coroutine
-    cg.add(var.set_pin(pin))
+    cg.add(var.set_pin(pin.get_pin()))
     await cg.register_component(var, config)  # Await registration
     await switch.register_switch(var, config)  # Await switch registration
