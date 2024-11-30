@@ -17,6 +17,8 @@ class EmptySwitch : public switch_::Switch, public Component {
   void dump_config() override;
  protected:
   uint8_t pin_;
+  PIO pio_;
+  uint sm_;  // State machine index
 };
 
 } //namespace empty_switch
