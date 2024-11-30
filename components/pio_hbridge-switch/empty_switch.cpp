@@ -13,7 +13,7 @@ static const char *TAG = "empty_switch.switch";
 static const uint16_t pio_instructions[] = {
     pio_encode_pull(false, true),                      // pull, noblock
     pio_encode_mov(pio_x, pio_osr),                    // mov x, osr
-    pio_encode_jmp_not_x(2),                           // jmp !x, to "disabled" (3rd instruction)
+    pio_encode_jmp_not_x(6),                           // jmp !x, to "disabled" (3rd instruction)
     pio_encode_set(pio_pins, 0b01) | 3,                // set pins, 0b01 [3]
     pio_encode_set(pio_pins, 0b10) | 3,                // set pins, 0b10 [3]
     pio_encode_jmp(0),                                 // wrap
@@ -52,10 +52,11 @@ void EmptySwitch::setup() {
 
     // Initialize the PIO state machine
     pio_sm_init(pio_, sm_, offset, &cfg);
-    pio_sm_set_enabled(pio_, sm_, true);  // Enable the state machine
-
     // Start with the switch off
     this->write_state(false);
+    pio_sm_set_enabled(pio_, sm_, true);  // Enable the state machine
+
+    
 }
 
 void EmptySwitch::write_state(bool state) {
