@@ -21,3 +21,5 @@ class EmptySwitch : public switch_::Switch, public Component {
 
 } //namespace empty_switch
 } //namespace esphome
+
+#endif
