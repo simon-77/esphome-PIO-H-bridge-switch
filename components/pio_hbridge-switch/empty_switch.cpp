@@ -19,7 +19,12 @@ void EmptySwitch::setup() {
 
 void EmptySwitch::write_state(bool state) {
 
+    if (!pin_) {
+        ESP_LOGW(TAG, "No pin defined for custom pio_hbridge-switch '%s'", this->get_name().c_str());
+        return;
+    }
 
+    gpio_put(pin_, state);
 }
 
 void EmptySwitch::dump_config(){
