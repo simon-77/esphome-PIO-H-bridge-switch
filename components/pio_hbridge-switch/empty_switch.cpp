@@ -10,20 +10,15 @@ static const char *TAG = "empty_switch.switch";
 
 #include "hardware/structs/pio.h"
 
-// Inside setup(), replace the hardcoded program with assembler style
-pio_program_t my_pio_program = {
-    .instructions = {
-        pio_encode_pull(false, true),                  // pull, noblock
-        pio_encode_mov(pio_x, pio_osr),                // mov x, osr
-        pio_encode_jmp_not_x(2),                       // jmp !x, to "disabled" (3rd instruction)
-        pio_encode_set(pio_pins, 0b01) | 3,            // set pins, 0b01 [3]
-        pio_encode_set(pio_pins, 0b10) | 3,            // set pins, 0b10 [3]
-        pio_encode_jmp(0),                             // wrap
-        pio_encode_set(pio_pins, 0b00),                // set pins, 0b00 (disabled)
-        pio_encode_jmp(0),                             // jmp to "start"
-    },
-    .length = 8,  // Number of instructions
-    .origin = -1  // Use free memory
+static const uint16_t pio_instructions[] = {
+    pio_encode_pull(false, true),                      // pull, noblock
+    pio_encode_mov(pio_x, pio_osr),                    // mov x, osr
+    pio_encode_jmp_not_x(2),                           // jmp !x, to "disabled" (3rd instruction)
+    pio_encode_set(pio_pins, 0b01) | 3,                // set pins, 0b01 [3]
+    pio_encode_set(pio_pins, 0b10) | 3,                // set pins, 0b10 [3]
+    pio_encode_jmp(0),                                 // wrap
+    pio_encode_set(pio_pins, 0b00),                    // set pins, 0b00 (disabled)
+    pio_encode_jmp(0),                                 // jmp to "start"
 };
 
 
@@ -34,6 +29,13 @@ void EmptySwitch::setup() {
         ESP_LOGW(TAG, "No pin defined for custom PIO switch '%s'", this->get_name().c_str());
         return;
     }
+
+    // 1. Initialize the PIO program
+    pio_program_t my_pio_program = {
+        .instructions = pio_instructions,  // Point to the array of instructions
+        .length = sizeof(pio_instructions) / sizeof(uint16_t),  // The number of instructions
+        .origin = -1  // Use free memory
+    };
 
     // Claim a PIO instance and state machine
     pio_ = pio0;  // Use PIO0 (could also be pio1)
