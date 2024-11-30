@@ -3,13 +3,29 @@
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
 
-// Include the generated header from the .pio file
-#include "hbridge.pio.h"
-
 namespace esphome {
 namespace empty_switch {
 
 static const char *TAG = "empty_switch.switch";
+
+#include "hardware/structs/pio.h"
+
+// Inside setup(), replace the hardcoded program with assembler style
+pio_program_t my_pio_program = {
+    .instructions = {
+        pio_encode_pull(false, true),                  // pull, noblock
+        pio_encode_mov(pio_x, pio_osr),                // mov x, osr
+        pio_encode_jmp_not_x(2),                       // jmp !x, to "disabled" (3rd instruction)
+        pio_encode_set(pio_pins, 0b01) | 3,            // set pins, 0b01 [3]
+        pio_encode_set(pio_pins, 0b10) | 3,            // set pins, 0b10 [3]
+        pio_encode_jmp(0),                             // wrap
+        pio_encode_set(pio_pins, 0b00),                // set pins, 0b00 (disabled)
+        pio_encode_jmp(0),                             // jmp to "start"
+    },
+    .length = 8,  // Number of instructions
+    .origin = -1  // Use free memory
+};
+
 
 void EmptySwitch::setup() {
     ESP_LOGCONFIG(TAG, "Setting up custom PIO H-bridge switch...");
@@ -20,20 +36,21 @@ void EmptySwitch::setup() {
     }
 
     // Claim a PIO instance and state machine
-    pio_ = pio0;  // Use PIO0 (or pio1 for the second PIO)
+    pio_ = pio0;  // Use PIO0 (could also be pio1)
     sm_ = pio_claim_unused_sm(pio_, true);
 
-    // Load the program into the PIO
-    uint offset = pio_add_program(pio_, &hbridge);
+    // Load the PIO program into the PIO memory
+    uint offset = pio_add_program(pio_, &my_pio_program);
 
-    // Configure the state machine
-    pio_sm_config cfg = hbridge_program_get_default_config(offset);
-    sm_config_set_set_pins(&cfg, pin_, 2);  // Use pin_ and pin_ + 1 for outputs
+    // Configure the PIO program
+    pio_sm_config cfg = pio_get_default_sm_config();
+    sm_config_set_set_pins(&cfg, pin_, 2);  // Configure output pins: pin_ and pin_ + 1
+    //sm_config_set_out_shift(&cfg, false, false, 32);  // Configure shifting options
     sm_config_set_clkdiv(&cfg, 8125);  // Adjust clock divider for desired frequency
 
-    // Initialize the state machine
+    // Initialize the PIO state machine
     pio_sm_init(pio_, sm_, offset, &cfg);
-    pio_sm_set_enabled(pio_, sm_, true);
+    pio_sm_set_enabled(pio_, sm_, true);  // Enable the state machine
 
     // Start with the switch off
     this->write_state(false);
