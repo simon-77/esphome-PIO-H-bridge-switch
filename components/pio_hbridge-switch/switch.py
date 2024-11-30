@@ -12,9 +12,9 @@ CONFIG_SCHEMA = switch.SWITCH_SCHEMA.extend({
     cv.GenerateID(): cv.declare_id(EmptySwitch)
 }).extend(cv.COMPONENT_SCHEMA)
 
-async def to_code(config):
+def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    pin = await cg.gpio_pin_expression(config[CONF_PIN])
-    cg.add(var.set_pin(pin))
+    pin = cg.gpio_pin_expression(config[CONF_PIN])
+    cg.add(var.set_pin(config[CONF_PIN]))
     yield cg.register_component(var, config)
     yield switch.register_switch(var, config)
